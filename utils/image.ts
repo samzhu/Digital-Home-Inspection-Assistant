@@ -50,10 +50,12 @@ export const compressImage = async (file: File): Promise<Blob> => {
           // 字體大小約為長邊的 2.5%，最小 24px
           const fontSize = Math.max(24, Math.floor(longSide * 0.025));
           
-          // 修正：邊距統一使用長邊的 3.5% 來計算
-          // 之前用 width * 0.03 在直式照片會太小 (例如 1080 * 0.03 = 32px)，導致字體貼邊
-          // 改用 longSide (例如 1920 * 0.035 = 67px) 確保足夠空間
-          const padding = Math.floor(longSide * 0.035);
+          // 設定 X 軸邊距 (右側內縮)
+          const paddingX = Math.floor(longSide * 0.03);
+          
+          // 設定 Y 軸邊距 (底部內縮)
+          // 加大底部邊距係數至 0.06，讓日期時間往上移動，避免貼底或被遮擋
+          const paddingY = Math.floor(longSide * 0.06);
 
           ctx.font = `bold ${fontSize}px sans-serif`;
           ctx.textAlign = 'right';
@@ -64,11 +66,11 @@ export const compressImage = async (file: File): Promise<Blob> => {
           ctx.lineWidth = Math.max(3, fontSize / 8);
           ctx.lineJoin = 'round';
           ctx.miterLimit = 2;
-          ctx.strokeText(timestamp, width - padding, height - padding);
+          ctx.strokeText(timestamp, width - paddingX, height - paddingY);
 
           // 填色 (白色)
           ctx.fillStyle = 'white';
-          ctx.fillText(timestamp, width - padding, height - padding);
+          ctx.fillText(timestamp, width - paddingX, height - paddingY);
         }
         
         canvas.toBlob(
