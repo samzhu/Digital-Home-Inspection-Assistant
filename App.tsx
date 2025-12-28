@@ -340,6 +340,16 @@ const App: React.FC = () => {
         </header>
 
         <div className="flex-1 overflow-y-auto px-4 py-6 md:p-6 space-y-6 md:space-y-10 pb-40 w-full">
+           {/* Description (Moved to Top) */}
+           <section className="space-y-4 w-full">
+              <div className="px-2"><div className="flex items-center gap-2 mb-1.5 text-gray-400 uppercase tracking-widest text-[10px] font-black"><Layers size={12} /> 檢查事項</div><h3 className="text-xl font-black text-gray-800">{editingItem.title}</h3></div>
+              <div className="bg-white rounded-3xl p-5 border-2 border-gray-50 shadow-sm space-y-4">
+                <div className="flex justify-between items-center"><div className="flex items-center gap-2 text-orange-500 font-black text-xs"><MessageSquareQuote size={16} /> 檢查說明</div><div className="flex gap-2"><button onClick={analyzeDefectWithAi} disabled={isAiProcessing || itemDefectImages.length === 0} className="p-2 bg-blue-50 text-blue-600 rounded-xl active:scale-90 transition-transform disabled:opacity-30 hover:bg-blue-100">{isAiProcessing ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}</button><button onClick={handleVoiceRecord} disabled={isAiProcessing} className={`p-2 rounded-xl active:scale-90 transition-all hover:opacity-80 ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-orange-50 text-orange-500'}`}><Mic size={18} /></button></div></div>
+                {aiSuggestion && (<div className="p-4 bg-orange-50 border-2 border-orange-100 rounded-2xl animate-slide-up mb-2"><p className="text-xs font-bold text-orange-800 mb-3">AI 建議：{aiSuggestion}</p><div className="flex gap-2"><button onClick={() => { const updated = editingItem.description ? `${editingItem.description}\n${aiSuggestion}` : aiSuggestion; setEditingItem({...editingItem, description: updated}); db.items.update(editingItem.id, {description: updated}); setAiSuggestion(null); }} className="flex-1 py-2 bg-orange-500 text-white text-[10px] font-black rounded-lg hover:bg-orange-600">套用</button><button onClick={() => setAiSuggestion(null)} className="flex-1 py-2 bg-white text-gray-400 text-[10px] font-black rounded-lg border hover:bg-gray-50">略過</button></div></div>)}
+                <textarea className="w-full min-h-[120px] outline-none text-sm text-gray-700 font-medium placeholder:text-gray-300 bg-transparent resize-none" placeholder="輸入檢查細節..." value={editingItem.description} onChange={e => { const val = e.target.value; setEditingItem({...editingItem, description: val}); db.items.update(editingItem.id, {description: val}); }} />
+              </div>
+            </section>
+
            {/* Status */}
            <section>
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4">狀態回饋</label>
@@ -374,16 +384,6 @@ const App: React.FC = () => {
               )}
             </section>
 
-            {/* Description */}
-            <section className="space-y-4 w-full">
-              <div className="px-2"><div className="flex items-center gap-2 mb-1.5 text-gray-400 uppercase tracking-widest text-[10px] font-black"><Layers size={12} /> 檢查事項</div><h3 className="text-xl font-black text-gray-800">{editingItem.title}</h3></div>
-              <div className="bg-white rounded-3xl p-5 border-2 border-gray-50 shadow-sm space-y-4">
-                <div className="flex justify-between items-center"><div className="flex items-center gap-2 text-orange-500 font-black text-xs"><MessageSquareQuote size={16} /> 檢查說明</div><div className="flex gap-2"><button onClick={analyzeDefectWithAi} disabled={isAiProcessing || itemDefectImages.length === 0} className="p-2 bg-blue-50 text-blue-600 rounded-xl active:scale-90 transition-transform disabled:opacity-30 hover:bg-blue-100">{isAiProcessing ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}</button><button onClick={handleVoiceRecord} disabled={isAiProcessing} className={`p-2 rounded-xl active:scale-90 transition-all hover:opacity-80 ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-orange-50 text-orange-500'}`}><Mic size={18} /></button></div></div>
-                {aiSuggestion && (<div className="p-4 bg-orange-50 border-2 border-orange-100 rounded-2xl animate-slide-up mb-2"><p className="text-xs font-bold text-orange-800 mb-3">AI 建議：{aiSuggestion}</p><div className="flex gap-2"><button onClick={() => { const updated = editingItem.description ? `${editingItem.description}\n${aiSuggestion}` : aiSuggestion; setEditingItem({...editingItem, description: updated}); db.items.update(editingItem.id, {description: updated}); setAiSuggestion(null); }} className="flex-1 py-2 bg-orange-500 text-white text-[10px] font-black rounded-lg hover:bg-orange-600">套用</button><button onClick={() => setAiSuggestion(null)} className="flex-1 py-2 bg-white text-gray-400 text-[10px] font-black rounded-lg border hover:bg-gray-50">略過</button></div></div>)}
-                <textarea className="w-full min-h-[120px] outline-none text-sm text-gray-700 font-medium placeholder:text-gray-300 bg-transparent resize-none" placeholder="輸入檢查細節..." value={editingItem.description} onChange={e => { const val = e.target.value; setEditingItem({...editingItem, description: val}); db.items.update(editingItem.id, {description: val}); }} />
-              </div>
-            </section>
-
             {/* Images */}
             <div className="space-y-12 w-full">
               <section><div className="flex items-center gap-2 mb-4"><div className="bg-blue-500 p-1.5 rounded-lg text-white shadow-md shadow-blue-100"><ImageIcon size={14} /></div><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">1. 紀錄影像</label></div><div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">{itemRecordImages.map(img => (<div key={img.id} className="aspect-square relative rounded-3xl overflow-hidden border-4 border-white shadow-sm bg-gray-50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => db.images.get(img.id).then(i => i && setAnnotatingImage({blob: i.blob, id: i.id}))}><img src={img.url} className="w-full h-full object-cover" /></div>))}<label className="aspect-square rounded-3xl border-2 border-dashed border-blue-200 flex flex-col items-center justify-center text-blue-400 bg-blue-50/20 active:bg-blue-50 hover:bg-blue-50/50 cursor-pointer transition-colors"><Camera size={32} /><input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleFileUpload(e, 'record')} /></label></div></section>
@@ -410,7 +410,7 @@ const App: React.FC = () => {
           <div className="p-3 flex justify-between items-center border-b border-gray-50">
             <h1 className="text-base font-black text-gray-800 flex items-center gap-2">
               <div className="bg-safety-orange p-1 rounded-md text-white"><ClipboardList size={16} /></div>
-              驗屋助手
+              數位驗屋
             </h1>
             <div className="flex bg-gray-100 rounded-full p-0.5">
               <button onClick={() => setViewMode(ViewMode.ALL)} className={`px-3 py-0.5 rounded-full text-[10px] font-black uppercase transition-all ${viewMode === ViewMode.ALL ? 'bg-white shadow-sm text-safety-orange' : 'text-gray-400'}`}>全部</button>
