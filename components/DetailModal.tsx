@@ -4,6 +4,7 @@ import { db } from '../db';
 import { Camera, Image as ImageIcon, Mic, X, Trash2, Edit3, Wand2, ChevronDown, CheckCircle, AlertCircle } from 'lucide-react';
 import PhotoEditor from './PhotoEditor';
 import { analyzeDefectImage, transcribeAudio } from '../services/geminiService';
+import { compressImage } from '../utils/image';
 
 interface DetailModalProps {
   item: CheckItem;
@@ -55,13 +56,17 @@ const DetailModal: React.FC<DetailModalProps> = ({ item, onClose }) => {
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      // Use compressImage to process the image and burn in the timestamp
+      const processedBlob = await compressImage(file);
+
       const type = data.status === InspectionStatus.FAIL ? PhotoType.DEFECT : PhotoType.RECORD;
       const photoId = crypto.randomUUID();
       
       const newImage: InspectionImage = {
         id: photoId,
         itemId: data.id,
-        blob: file,
+        blob: processedBlob,
         annotationData: null,
         createdAt: Date.now()
       };
@@ -76,7 +81,7 @@ const DetailModal: React.FC<DetailModalProps> = ({ item, onClose }) => {
 
       const newPhoto: Photo = {
         id: photoId,
-        blob: file,
+        blob: processedBlob,
         type: type,
         timestamp: Date.now(),
         isAnnotated: false
